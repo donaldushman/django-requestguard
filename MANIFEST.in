@@ -1,0 +1,4 @@
+include README.md
+include LICENSE
+recursive-include src/django_requestguard *.py
+include src/django_requestguard/py.typed
