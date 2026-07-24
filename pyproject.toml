@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["django", "middleware", "security", "request-filtering"]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 5 - Production/Stable",
   "Framework :: Django",
   "Framework :: Django :: 4.2",
   "Framework :: Django :: 5.0",
