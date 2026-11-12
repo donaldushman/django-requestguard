@@ -115,6 +115,49 @@ Place `django_requestguard.middleware.BlockBotsMiddleware` near the beginning
 of `MIDDLEWARE`, ideally before session and authentication middleware, to
 reject unwanted requests before downstream application processing.
 
+## Blocked-request logging
+
+Every blocked request emits an `INFO` message to the
+`django_requestguard` Python logger. The message includes the blocking reason
+(`blocked_path` or `blocked_user_agent`), matched rule, request path, and
+HTTP status. The same fields are available as `LogRecord` attributes
+`requestguard_reason`, `requestguard_rule`, `requestguard_path`, and
+`requestguard_status` for structured logging.
+
+For example:
+
+```text
+blocked_request reason=blocked_user_agent path=/events/ rule=bytespider status=403
+```
+
+No request body, query string, IP address, cookies, or complete user-agent
+header is intentionally logged. The path itself may still contain sensitive
+values, so avoid embedding secrets in URL paths.
+
+Use Django's normal `LOGGING` configuration to route or suppress these
+messages. For example, to show them in Heroku's application logs:
+
+```python
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "django_requestguard": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
+```
+
+Merge this example into your existing `LOGGING` dictionary rather than
+replacing an application's logging configuration. Logging is observational:
+it does not change which requests are blocked or their HTTP status codes.
+
 ## Running Tests
 
 ```bash
