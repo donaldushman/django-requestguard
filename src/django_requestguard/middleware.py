@@ -1,12 +1,14 @@
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseForbidden, HttpResponseNotFound
 
 from .rules import get_blocked_path_rules
 from .remote import load_blocked_path_rules_from_s3
+from .user_agents import matched_user_agent
 
 
 class BlockBotsMiddleware:
     """
-    Block common scanner requests for sensitive files and paths.
+    Block common scanner requests for sensitive files and paths, and
+    optionally reject selected crawler user agents.
     """
 
     def __init__(self, get_response):
@@ -33,5 +35,8 @@ class BlockBotsMiddleware:
 
         if any(path.startswith(pattern) for pattern in rules.starts_with):
             return HttpResponseNotFound()
+
+        if matched_user_agent(request.META.get("HTTP_USER_AGENT", "")):
+            return HttpResponseForbidden()
 
         return self.get_response(request)
