@@ -83,6 +83,38 @@ If no custom settings are provided:
 - built-in path block rules are active
 - additional remote rules are optional
 
+
+## Optional user-agent filtering
+
+User-agent filtering is **disabled by default**, so upgrading does not change
+existing request behavior. To enable it:
+
+```python
+REQUESTGUARD_BLOCK_USER_AGENTS = True
+```
+
+The package includes a small curated list of unwanted crawler identifiers:
+`Bytespider`, `SemrushBot`, `ExaSearchBot`, `SEOJuice-SearchBot`,
+`RecordedFuture Global Inventory Crawler`, and `RealCyber-enricher`.
+Matching is case-insensitive and uses substrings of the user-agent header.
+User-agent headers are self-reported and are not proof of crawler identity.
+
+Optionally add patterns or exclude individual patterns:
+
+```python
+REQUESTGUARD_EXTRA_BLOCKED_USER_AGENTS = ["MyUnwantedCrawler"]
+REQUESTGUARD_ALLOWED_USER_AGENTS = ["semrushbot"]
+```
+
+The allowed list removes exact patterns from the combined blocklist; it does
+**not** bypass sensitive-path rules or act as a trusted-user-agent allowlist.
+Blocked user agents receive HTTP 403; existing path rules continue to return
+HTTP 404. No remote service or database lookup is required for user-agent checks.
+
+Place `django_requestguard.middleware.BlockBotsMiddleware` near the beginning
+of `MIDDLEWARE`, ideally before session and authentication middleware, to
+reject unwanted requests before downstream application processing.
+
 ## Running Tests
 
 ```bash
